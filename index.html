@@ -478,8 +478,8 @@
 // =============================================
 //  設定 — GAS URL とパスワードをここに入力
 // =============================================
-const GAS_URL = 'YOUR_GAS_URL_HERE'; // GAS WebアプリのURLに書き換える
-const PASSWORD_HASH = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // 初期は空文字列のハッシュ
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzW33rdYiFKxdQuqmVSK8xG7VfbBp0rVYOqVt1EhQb68B3BDJ3HXv8CoxdAKwMbd6Mi3A/exec'; // GAS WebアプリのURLに書き換える
+const PASSWORD = '2026'; // 初期は空文字列のハッシュ
 
 // =============================================
 //  パスワードハッシュ化
@@ -492,10 +492,9 @@ async function sha256(str) {
 // =============================================
 //  ログイン
 // =============================================
-async function doLogin() {
+function doLogin() {
   const val = document.getElementById('pwInput').value;
-  const hash = await sha256(val);
-  if (hash === PASSWORD_HASH) {
+  if (val === PASSWORD) {
     sessionStorage.setItem('auth', '1');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
