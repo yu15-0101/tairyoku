@@ -412,10 +412,11 @@ const USERS = [
   { name: 'はやし', password: 'hayashi'  },
 ];
 
+
 // ============================================================
 //  ★GASのURLをここに入れる
 // ============================================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbx04-Cpc56-GsGMcROQpVcGVAsuqWQzCwFyA89fm84EZoPIbuLJbnvmNiU88ebiyF1VUQ/exec';
+const GAS_URL = 'https://script.google.com/macros/library/d/1m1B8aGOhxWDik1hVKCcdk6d9n-MpuJNmVcHFdk-XFJfekswcOB9AJKP2/3';
 
 // ============================================================
 //  全国平均（文科省 令和4年度）
@@ -497,15 +498,29 @@ let radarInst=null, compareInst=null, trendInst=null;
 function localKey() { return 'tairyoku_' + currentUser; }
 
 async function loadRecords() {
+  // まずローカルから読み込んで即表示
   try { const c = localStorage.getItem(localKey()); if(c) records = JSON.parse(c); } catch(e) {}
+  renderAll();
+
+  // GASから最新データを取得
   if (GAS_URL !== 'YOUR_GAS_URL_HERE') {
     try {
-      const res = await fetch(GAS_URL + '?action=getUser&user=' + encodeURIComponent(currentUser));
-      records = await res.json();
-      localStorage.setItem(localKey(), JSON.stringify(records));
-    } catch(e) { console.warn('GAS接続失敗、ローカルデータ使用'); }
+      const res = await fetch(GAS_URL + '?action=getUser&user=' + encodeURIComponent(currentUser), {
+        method: 'GET',
+        mode: 'cors',
+      });
+      const data = await res.json();
+      // GASから取得できた場合のみ上書き
+      if (Array.isArray(data)) {
+        records = data;
+        localStorage.setItem(localKey(), JSON.stringify(records));
+        renderAll();
+      }
+    } catch(e) {
+      console.warn('GAS読み込み失敗、ローカルデータで継続:', e);
+      // ローカルデータはそのまま使う（消えない）
+    }
   }
-  renderAll();
 }
 
 function saveLocal() { localStorage.setItem(localKey(), JSON.stringify(records)); }
