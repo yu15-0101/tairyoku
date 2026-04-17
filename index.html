@@ -2,472 +2,394 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2563eb">
 <title>体力測定</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 
   :root {
-    --bg: #f0f2f7;
-    --surface: #ffffff;
-    --surface2: #f8f9fc;
     --primary: #2563eb;
-    --primary-light: #dbeafe;
-    --accent: #0ea5e9;
     --danger: #ef4444;
     --success: #22c55e;
     --warning: #f59e0b;
+    --bg: #f1f5f9;
+    --surface: #ffffff;
     --text: #1e293b;
     --text-muted: #64748b;
     --border: #e2e8f0;
-    --radius: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+    --radius: 14px;
+    --nav-h: 64px;
+    --header-h: 54px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   body {
     font-family: 'Noto Sans JP', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    padding-bottom: var(--nav-h);
   }
 
   /* ===== LOGIN ===== */
   #loginScreen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 60%, #38bdf8 100%);
+    z-index: 9999; padding: 24px;
   }
-  .login-card {
-    background: white;
-    border-radius: 20px;
-    padding: 48px 40px;
-    width: 360px;
-    box-shadow: var(--shadow-lg);
-    text-align: center;
-  }
-  .login-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .login-logo svg { width: 32px; height: 32px; }
-  .login-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
-  .login-label { display: block; text-align: left; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .login-logo { font-size: 24px; font-weight: 700; color: white; margin-bottom: 6px; }
+  .login-sub  { color: rgba(255,255,255,.7); font-size: 13px; margin-bottom: 32px; }
+  .login-card { background: white; border-radius: 20px; padding: 28px 20px; width: 100%; max-width: 340px; }
+  .login-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; display: block; }
   .login-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color .2s;
-    margin-bottom: 20px;
+    width: 100%; padding: 14px 16px; border: 2px solid var(--border);
+    border-radius: 12px; font-size: 16px; font-family: inherit;
+    outline: none; transition: border-color .2s; margin-bottom: 12px;
   }
   .login-input:focus { border-color: var(--primary); }
   .login-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background .2s, transform .1s;
+    width: 100%; padding: 15px; background: var(--primary);
+    color: white; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer;
   }
-  .login-btn:hover { background: #1d4ed8; }
-  .login-btn:active { transform: scale(.98); }
-  .login-error { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+  .login-btn:active { opacity: .85; }
+  .login-error { color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center; display: none; }
 
   /* ===== HEADER ===== */
   header {
-    background: white;
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: white; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; z-index: 100;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
-  .header-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .header-title { font-size: 16px; font-weight: 700; color: var(--primary); }
+  .header-user  { font-size: 12px; color: var(--text-muted); }
+  .header-right { display: flex; gap: 6px; }
+  .icon-btn {
+    height: 36px; padding: 0 12px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: white;
+    font-size: 12px; font-weight: 500; font-family: inherit;
+    cursor: pointer; color: var(--text-muted); white-space: nowrap;
   }
-  .header-logo svg { width: 24px; height: 24px; }
-  .header-actions { display: flex; gap: 8px; }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: white;
-    color: var(--text);
-    transition: background .15s, border-color .15s;
-  }
-  .btn:hover { background: var(--surface2); }
-  .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
-  .btn-primary:hover { background: #1d4ed8; }
-  .btn-danger { color: var(--danger); border-color: #fecaca; background: #fff5f5; }
-  .btn-danger:hover { background: #fee2e2; }
+  .icon-btn.danger { border-color: #fecaca; color: var(--danger); }
+  .icon-btn:active { opacity: .75; }
 
   /* ===== MAIN ===== */
-  main { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+  main { margin-top: var(--header-h); padding: 14px; }
 
-  /* ===== FORM CARD ===== */
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--nav-h); background: white;
+    border-top: 1px solid var(--border);
+    display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,.07); z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    cursor: pointer; border: none; background: none;
+    color: var(--text-muted); font-family: inherit;
+    font-size: 10px; font-weight: 500;
+  }
+  .nav-item.active { color: var(--primary); }
+  .nav-icon { font-size: 20px; }
+
+  /* ===== SECTIONS ===== */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ===== CARD ===== */
   .card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
+    background: white; border-radius: var(--radius);
+    padding: 18px; margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
-  .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: var(--text);
-  }
-  .form-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-  }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
-  .form-group input, .form-group select {
-    padding: 9px 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    background: white;
-    color: var(--text);
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+
+  /* ===== FORM ===== */
+  .form-group { margin-bottom: 12px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; display: block; }
+  .form-input, .form-select {
+    width: 100%; padding: 13px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 16px; font-family: inherit;
+    background: white; color: var(--text); outline: none;
     transition: border-color .2s;
-    min-width: 100px;
+    appearance: none; -webkit-appearance: none;
   }
-  .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
-  .form-group.name input { width: 140px; }
-  .form-group.record input { width: 120px; }
-
-  /* ===== TABS ===== */
-  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 0; }
-  .tab {
-    padding: 10px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--text-muted);
-    font-family: inherit;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: color .15s;
+  .form-input:focus, .form-select:focus { border-color: var(--primary); }
+  .submit-btn {
+    width: 100%; padding: 15px; background: var(--primary); color: white;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 700; font-family: inherit;
+    cursor: pointer; margin-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-  .tab:hover { color: var(--text); }
+  .submit-btn:active { opacity: .85; }
 
-  /* ===== TABLE ===== */
-  .table-header {
-    background: var(--primary);
-    color: white;
-    padding: 14px 20px;
-    border-radius: var(--radius) var(--radius) 0 0;
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  /* ===== 記録カード ===== */
+  .event-scroll {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding-bottom: 4px; margin-bottom: 14px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
-  .table-wrap { background: white; border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { padding: 10px 16px; text-align: left; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); background: var(--surface2); }
-  td { padding: 11px 16px; border-bottom: 1px solid var(--border); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f8faff; }
-  .empty-row td { text-align: center; color: var(--text-muted); padding: 32px; }
+  .event-scroll::-webkit-scrollbar { display: none; }
+  .event-chip {
+    flex-shrink: 0; padding: 7px 13px;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 100px; font-size: 12px; font-weight: 500;
+    cursor: pointer; white-space: nowrap; color: var(--text-muted);
+    font-family: inherit; transition: all .15s;
+  }
+  .event-chip.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-  /* ===== RANK BADGE ===== */
-  .rank { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 13px; }
+  .rec-card {
+    background: white; border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .rec-rank {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; flex-shrink: 0;
+  }
   .rank-A { background: #dcfce7; color: #166534; }
   .rank-B { background: #dbeafe; color: #1e40af; }
   .rank-C { background: #fef9c3; color: #854d0e; }
   .rank-D { background: #ffedd5; color: #9a3412; }
   .rank-E { background: #fee2e2; color: #991b1b; }
 
-  /* ===== DELETE BTN ===== */
-  .btn-del {
-    padding: 4px 10px;
-    font-size: 12px;
-    color: var(--danger);
-    background: none;
-    border: 1px solid #fecaca;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s;
+  .rec-info { flex: 1; min-width: 0; }
+  .rec-event { font-size: 14px; font-weight: 600; }
+  .rec-meta  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .rec-right { text-align: right; flex-shrink: 0; }
+  .rec-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .rec-unit  { font-size: 11px; color: var(--text-muted); }
+  .rec-avg   { font-size: 11px; margin-top: 2px; }
+  .rec-del {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1.5px solid #fecaca; background: #fff5f5;
+    color: var(--danger); font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
   }
-  .btn-del:hover { background: #fee2e2; }
+  .rec-del:active { background: #fee2e2; }
+  .empty-msg { text-align: center; padding: 40px 16px; color: var(--text-muted); font-size: 14px; }
+  .empty-icon { font-size: 36px; margin-bottom: 8px; }
 
-  /* ===== CHARTS SECTION ===== */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 20px;
+  /* ===== グラフ ===== */
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+  .stat-card {
+    background: white; border-radius: 12px; padding: 12px;
+    text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
-  .chart-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
-  .chart-card.full { grid-column: 1 / -1; }
-  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
-  .chart-wrap { position: relative; height: 280px; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
-  /* ===== STATS GRID ===== */
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat-card { background: white; border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); }
-  .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-  .stat-value { font-size: 24px; font-weight: 700; font-family: 'DM Sans', sans-serif; color: var(--primary); }
-  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-  /* ===== NAV ===== */
-  .nav { display: flex; gap: 8px; margin-bottom: 20px; }
-  .nav-btn {
-    padding: 9px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: white;
-    color: var(--text-muted);
-    transition: all .15s;
+  .chart-card {
+    background: white; border-radius: var(--radius);
+    padding: 16px; margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
-  .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-  .nav-btn:hover:not(.active) { background: var(--surface2); color: var(--text); }
-
-  /* ===== SECTION ===== */
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* ===== LOADING ===== */
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: var(--primary); border-radius: 50%; animation: spin .6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .chart-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+  .chart-sub   { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display:flex; align-items:center; gap:6px; }
+  .chart-sel   { padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; background: white; appearance: none; -webkit-appearance: none; outline:none; }
+  .chart-wrap  { position: relative; height: 220px; }
 
   /* ===== TOAST ===== */
   #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #1e293b;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 14px;
-    box-shadow: var(--shadow-lg);
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all .3s;
-    z-index: 9999;
+    position: fixed; bottom: calc(var(--nav-h) + 12px); left: 14px; right: 14px;
+    background: #1e293b; color: white; padding: 13px 18px;
+    border-radius: 12px; font-size: 14px; text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    transform: translateY(16px); opacity: 0;
+    transition: all .25s; z-index: 9998; pointer-events: none;
   }
   #toast.show { transform: translateY(0); opacity: 1; }
 
   /* ===== MODAL ===== */
   .modal-bg {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.4);
-    z-index: 500;
-    align-items: center;
-    justify-content: center;
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 500; display: none; align-items: flex-end;
   }
   .modal-bg.open { display: flex; }
   .modal {
-    background: white;
-    border-radius: 16px;
-    padding: 32px;
-    width: 360px;
-    box-shadow: var(--shadow-lg);
-    text-align: center;
+    background: white; border-radius: 20px 20px 0 0;
+    padding: 24px 20px 32px; width: 100%;
   }
-  .modal h3 { font-size: 18px; margin-bottom: 10px; }
-  .modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+  .modal h3 { font-size: 17px; margin-bottom: 8px; }
+  .modal p  { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-full {
+    width: 100%; padding: 14px; border-radius: 12px;
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--text);
+  }
+  .btn-full.danger { background: var(--danger); color: white; border-color: var(--danger); }
 
-  @media (max-width: 640px) {
-    .charts-grid { grid-template-columns: 1fr; }
-    .charts-grid .full { grid-column: 1; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .form-row { flex-direction: column; }
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: white;
+    border-radius: 50%; animation: spin .6s linear infinite;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div id="loginScreen">
+  <div class="login-logo">📈 体力測定</div>
+  <p class="login-sub">記録管理システム</p>
   <div class="login-card">
-    <div class="login-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      体力測定
+    <div class="form-group">
+      <label class="login-label">名前</label>
+      <input type="text" id="loginName" class="login-input" placeholder="山田 太郎">
     </div>
-    <p class="login-subtitle">記録管理システム</p>
-    <label class="login-label">パスワード</label>
-    <input type="password" id="pwInput" class="login-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="form-group">
+      <label class="login-label">パスワード</label>
+      <input type="password" id="loginPw" class="login-input" placeholder="パスワード"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
     <button class="login-btn" onclick="doLogin()">ログイン</button>
-    <div class="login-error" id="loginError">パスワードが正しくありません</div>
+    <div class="login-error" id="loginError">名前またはパスワードが違います</div>
   </div>
 </div>
 
-<!-- ===== APP ===== -->
+<!-- APP -->
 <div id="app" style="display:none;">
   <header>
-    <div class="header-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      体力測定
+    <div>
+      <div class="header-title">📈 体力測定</div>
+      <div class="header-user" id="headerUser"></div>
     </div>
-    <div class="header-actions">
-      <button class="btn btn-danger" onclick="confirmReset()">🔄 記録リセット</button>
-      <button class="btn" onclick="doLogout()">🔒 ログアウト</button>
+    <div class="header-right">
+      <button class="icon-btn danger" onclick="confirmReset()">🔄 リセット</button>
+      <button class="icon-btn" onclick="doLogout()">🔒 ログアウト</button>
     </div>
   </header>
 
   <main>
-    <!-- NAV -->
-    <div class="nav">
-      <button class="nav-btn active" onclick="switchSection('input', this)">📝 記録入力</button>
-      <button class="nav-btn" onclick="switchSection('chart', this)">📊 グラフ・分析</button>
-    </div>
 
-    <!-- ===== INPUT SECTION ===== -->
+    <!-- 入力 -->
     <div id="sec-input" class="section active">
       <div class="card">
-        <div class="card-title">新しい記録を追加</div>
+        <div class="card-title">✏️ 新しい記録を追加</div>
+
         <div class="form-row">
-          <div class="form-group name">
-            <label>名前</label>
-            <input type="text" id="f-name" placeholder="山田 太郎">
-          </div>
           <div class="form-group">
-            <label>性別</label>
-            <select id="f-sex">
+            <label class="form-label">性別</label>
+            <select id="f-sex" class="form-select">
               <option>男子</option>
               <option>女子</option>
             </select>
           </div>
           <div class="form-group">
-            <label>年齢</label>
-            <select id="f-age">
+            <label class="form-label">年齢</label>
+            <select id="f-age" class="form-select">
               <option>20-24歳</option><option>25-29歳</option><option>30-34歳</option>
               <option>35-39歳</option><option>40-44歳</option><option>45-49歳</option>
               <option>50-54歳</option><option>55-59歳</option><option>60-64歳</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>種目</label>
-            <select id="f-event">
-              <option>50m走</option>
-              <option>長座体前屈</option>
-              <option>上体起こし</option>
-              <option>シャトルラン</option>
-              <option>反復横跳び</option>
-              <option>立ち幅とび</option>
-            </select>
-          </div>
-          <div class="form-group record">
-            <label>記録</label>
-            <input type="number" id="f-record" placeholder="例: 8.5" step="0.01">
-          </div>
-          <button class="btn btn-primary" onclick="addRecord()" id="addBtn">＋ 追加</button>
         </div>
-      </div>
 
-      <!-- TABS & TABLE -->
-      <div class="tabs" id="tabs"></div>
-      <div class="table-header" id="tableHeader">📋 50m走の記録</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>名前</th><th>性別</th><th>年齢</th><th>記録</th><th>単位</th><th>評価</th><th>全国平均</th><th>日時</th><th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="recordTable"></tbody>
-        </table>
+        <div class="form-group">
+          <label class="form-label">種目</label>
+          <select id="f-event" class="form-select">
+            <option>50m走</option>
+            <option>長座体前屈</option>
+            <option>上体起こし</option>
+            <option>シャトルラン</option>
+            <option>反復横跳び</option>
+            <option>立ち幅とび</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">記録</label>
+          <input type="number" id="f-record" class="form-input"
+            placeholder="例：8.5" step="0.01" inputmode="decimal">
+        </div>
+
+        <button class="submit-btn" onclick="addRecord()" id="addBtn">＋ 追加する</button>
       </div>
     </div>
 
-    <!-- ===== CHART SECTION ===== -->
+    <!-- 記録一覧 -->
+    <div id="sec-list" class="section">
+      <div class="event-scroll" id="eventChips"></div>
+      <div id="recList"></div>
+    </div>
+
+    <!-- グラフ -->
     <div id="sec-chart" class="section">
-      <div class="stats-grid" id="statsGrid"></div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">🕸️ レーダーチャート（種目バランス）</div>
-          <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="chart-card">
+        <div class="chart-title">🕸️ レーダーチャート（種目バランス）</div>
+        <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">📊 全国平均との比較</div>
+        <div class="chart-sub">
+          種目：
+          <select id="compareEvent" class="chart-sel" onchange="renderCompare()">
+            <option>50m走</option><option>長座体前屈</option><option>上体起こし</option>
+            <option>シャトルラン</option><option>反復横跳び</option><option>立ち幅とび</option>
+          </select>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">📊 全国平均との比較</div>
-          <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+        <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">📈 記録推移</div>
+        <div class="chart-sub">
+          種目：
+          <select id="trendEvent" class="chart-sel" onchange="renderTrend()">
+            <option>50m走</option><option>長座体前屈</option><option>上体起こし</option>
+            <option>シャトルラン</option><option>反復横跳び</option><option>立ち幅とび</option>
+          </select>
         </div>
-        <div class="chart-card full">
-          <div class="chart-title">📈 記録推移（棒グラフ）</div>
-          <div style="margin-bottom:10px; display:flex; gap:8px; align-items:center;">
-            <label style="font-size:13px;color:var(--text-muted)">種目：</label>
-            <select id="trendEvent" onchange="renderTrendChart()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">
-              <option>50m走</option><option>長座体前屈</option><option>上体起こし</option>
-              <option>シャトルラン</option><option>反復横跳び</option><option>立ち幅とび</option>
-            </select>
-            <label style="font-size:13px;color:var(--text-muted);margin-left:12px">名前：</label>
-            <select id="trendName" onchange="renderTrendChart()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">
-              <option value="">全員</option>
-            </select>
-          </div>
-          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
-        </div>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
       </div>
     </div>
+
   </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchSection('input',this)">
+      <span class="nav-icon">✏️</span>入力
+    </button>
+    <button class="nav-item" onclick="switchSection('list',this)">
+      <span class="nav-icon">📋</span>記録
+    </button>
+    <button class="nav-item" onclick="switchSection('chart',this)">
+      <span class="nav-icon">📊</span>グラフ
+    </button>
+  </nav>
 </div>
 
 <!-- RESET MODAL -->
 <div class="modal-bg" id="resetModal">
   <div class="modal">
-    <h3>⚠️ 記録リセット</h3>
-    <p>全ての記録を削除します。<br>この操作は取り消せません。</p>
+    <h3>⚠️ 自分の記録をリセット</h3>
+    <p>あなたの全記録を削除します。<br>この操作は取り消せません。</p>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-danger" onclick="doReset()">リセットする</button>
+      <button class="btn-full danger" onclick="doReset()">リセットする</button>
+      <button class="btn-full" onclick="closeModal()">キャンセル</button>
     </div>
   </div>
 </div>
@@ -475,427 +397,360 @@
 <div id="toast"></div>
 
 <script>
-// =============================================
-//  設定 — GAS URL とパスワードをここに入力
-// =============================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzW33rdYiFKxdQuqmVSK8xG7VfbBp0rVYOqVt1EhQb68B3BDJ3HXv8CoxdAKwMbd6Mi3A/exec'; // GAS WebアプリのURLに書き換える
-const PASSWORD = '2026'; // 初期は空文字列のハッシュ
+// ============================================================
+//  ★ユーザー設定（名前とパスワードを書き換えてください）
+// ============================================================
+const USERS = [
+  { name: 'あけさか', password: 'akesaka'   },
+  { name: 'いぐち', password: 'iguchi'   },
+  { name: 'えんどう', password: 'endo'   },
+  { name: 'おか', password: 'oka'  },
+  { name: 'しまざき', password: 'shimazaki'  },
+  { name: 'しみず', password: 'shimizu' },
+  { name: 'つつみ', password: 'tsutsumi' },
+  { name: 'はぎの', password: 'hagino'     },
+  { name: 'はやし', password: 'hayashi'  },
+];
 
-// =============================================
-//  パスワードハッシュ化
-// =============================================
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+// ============================================================
+//  ★GASのURLをここに入れる
+// ============================================================
+const GAS_URL = 'YOUR_GAS_URL_HERE';
+
+// ============================================================
+//  全国平均（文科省 令和4年度）
+// ============================================================
+const NATIONAL_AVG = {
+  '50m走':      { male: { '20-24歳':7.18,'25-29歳':7.25,'30-34歳':7.39,'35-39歳':7.55,'40-44歳':7.74,'45-49歳':7.96,'50-54歳':8.24,'55-59歳':8.55,'60-64歳':8.92 }, female: { '20-24歳':8.60,'25-29歳':8.76,'30-34歳':8.96,'35-39歳':9.18,'40-44歳':9.42,'45-49歳':9.69,'50-54歳':10.02,'55-59歳':10.40,'60-64歳':10.89 }, unit:'秒', lib:false },
+  '長座体前屈':  { male: { '20-24歳':46.7,'25-29歳':46.4,'30-34歳':45.6,'35-39歳':44.8,'40-44歳':44.0,'45-49歳':43.1,'50-54歳':42.0,'55-59歳':41.0,'60-64歳':39.9 }, female: { '20-24歳':51.8,'25-29歳':51.2,'30-34歳':50.5,'35-39歳':49.7,'40-44歳':48.8,'45-49歳':47.8,'50-54歳':46.6,'55-59歳':45.3,'60-64歳':43.8 }, unit:'cm', lib:true },
+  '上体起こし':  { male: { '20-24歳':29.2,'25-29歳':28.3,'30-34歳':26.8,'35-39歳':25.2,'40-44歳':23.5,'45-49歳':21.8,'50-54歳':19.8,'55-59歳':17.8,'60-64歳':15.8 }, female: { '20-24歳':22.1,'25-29歳':21.2,'30-34歳':20.0,'35-39歳':18.7,'40-44歳':17.2,'45-49歳':15.6,'50-54歳':13.8,'55-59歳':12.1,'60-64歳':10.5 }, unit:'回', lib:true },
+  'シャトルラン':{ male: { '20-24歳':68.1,'25-29歳':63.8,'30-34歳':59.2,'35-39歳':54.2,'40-44歳':49.2,'45-49歳':44.2,'50-54歳':39.1,'55-59歳':33.8,'60-64歳':28.8 }, female: { '20-24歳':46.0,'25-29歳':42.4,'30-34歳':38.8,'35-39歳':35.0,'40-44歳':31.2,'45-49歳':27.5,'50-54歳':23.9,'55-59歳':20.4,'60-64歳':17.2 }, unit:'回', lib:true },
+  '反復横跳び':  { male: { '20-24歳':57.1,'25-29歳':56.2,'30-34歳':54.8,'35-39歳':53.0,'40-44歳':51.0,'45-49歳':48.8,'50-54歳':46.4,'55-59歳':43.7,'60-64歳':40.8 }, female: { '20-24歳':48.7,'25-29歳':47.8,'30-34歳':46.4,'35-39歳':44.8,'40-44歳':43.1,'45-49歳':41.2,'50-54歳':38.9,'55-59歳':36.5,'60-64歳':33.9 }, unit:'点', lib:true },
+  '立ち幅とび':  { male: { '20-24歳':217.0,'25-29歳':213.1,'30-34歳':207.8,'35-39歳':201.4,'40-44歳':194.7,'45-49歳':187.6,'50-54歳':179.5,'55-59歳':170.5,'60-64歳':161.2 }, female: { '20-24歳':168.9,'25-29歳':165.7,'30-34歳':161.4,'35-39歳':156.6,'40-44歳':151.5,'45-49歳':146.0,'50-54歳':139.9,'55-59歳':133.4,'60-64歳':126.7 }, unit:'cm', lib:true },
+};
+const EVENTS = Object.keys(NATIONAL_AVG);
+const ICONS  = { '50m走':'🏃','長座体前屈':'🧘','上体起こし':'💪','シャトルラン':'🔄','反復横跳び':'↔️','立ち幅とび':'🦘' };
+
+// ============================================================
+//  ユーティリティ
+// ============================================================
+function getNatAvg(ev, sex, age) {
+  const d = NATIONAL_AVG[ev]; if (!d) return null;
+  return d[sex==='男子'?'male':'female'][age] ?? null;
+}
+function getRank(ev, sex, age, val) {
+  const avg = getNatAvg(ev, sex, age); if (!avg) return '-';
+  const lib = NATIONAL_AVG[ev].lib;
+  const r   = val / avg;
+  return lib ? (r>=1.20?'A':r>=1.08?'B':r>=0.93?'C':r>=0.80?'D':'E')
+             : (r<=0.85?'A':r<=0.93?'B':r<=1.07?'C':r<=1.18?'D':'E');
+}
+function getScore(ev, sex, age, val) {
+  const avg = getNatAvg(ev, sex, age); if (!avg) return 50;
+  const pct = (val - avg) / avg * 100;
+  return Math.max(0, Math.min(100, 50 + (NATIONAL_AVG[ev].lib ? pct : -pct)));
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
 }
 
-// =============================================
-//  ログイン
-// =============================================
+// ============================================================
+//  認証
+// ============================================================
+let currentUser = null;
+
 function doLogin() {
-  const val = document.getElementById('pwInput').value;
-  if (val === PASSWORD) {
-    sessionStorage.setItem('auth', '1');
+  const name = document.getElementById('loginName').value.trim();
+  const pw   = document.getElementById('loginPw').value;
+  const user = USERS.find(u => u.name === name && u.password === pw);
+  if (user) {
+    currentUser = user.name;
+    sessionStorage.setItem('user', currentUser);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    document.getElementById('headerUser').textContent = currentUser + ' さん';
     initApp();
   } else {
     document.getElementById('loginError').style.display = 'block';
   }
 }
-function doLogout() {
-  sessionStorage.removeItem('auth');
-  location.reload();
-}
+function doLogout() { sessionStorage.removeItem('user'); location.reload(); }
 
-// =============================================
-//  国民体力調査 全国平均値（文科省 令和4年度版）
-// =============================================
-const NATIONAL_AVG = {
-  '50m走':      { male: { '20-24歳':7.18,'25-29歳':7.25,'30-34歳':7.39,'35-39歳':7.55,'40-44歳':7.74,'45-49歳':7.96,'50-54歳':8.24,'55-59歳':8.55,'60-64歳':8.92 }, female: { '20-24歳':8.60,'25-29歳':8.76,'30-34歳':8.96,'35-39歳':9.18,'40-44歳':9.42,'45-49歳':9.69,'50-54歳':10.02,'55-59歳':10.40,'60-64歳':10.89 }, unit:'秒', lower_is_better:true },
-  '長座体前屈':  { male: { '20-24歳':46.7,'25-29歳':46.4,'30-34歳':45.6,'35-39歳':44.8,'40-44歳':44.0,'45-49歳':43.1,'50-54歳':42.0,'55-59歳':41.0,'60-64歳':39.9 }, female: { '20-24歳':51.8,'25-29歳':51.2,'30-34歳':50.5,'35-39歳':49.7,'40-44歳':48.8,'45-49歳':47.8,'50-54歳':46.6,'55-59歳':45.3,'60-64歳':43.8 }, unit:'cm', lower_is_better:false },
-  '上体起こし':  { male: { '20-24歳':29.2,'25-29歳':28.3,'30-34歳':26.8,'35-39歳':25.2,'40-44歳':23.5,'45-49歳':21.8,'50-54歳':19.8,'55-59歳':17.8,'60-64歳':15.8 }, female: { '20-24歳':22.1,'25-29歳':21.2,'30-34歳':20.0,'35-39歳':18.7,'40-44歳':17.2,'45-49歳':15.6,'50-54歳':13.8,'55-59歳':12.1,'60-64歳':10.5 }, unit:'回', lower_is_better:false },
-  'シャトルラン':{ male: { '20-24歳':68.1,'25-29歳':63.8,'30-34歳':59.2,'35-39歳':54.2,'40-44歳':49.2,'45-49歳':44.2,'50-54歳':39.1,'55-59歳':33.8,'60-64歳':28.8 }, female: { '20-24歳':46.0,'25-29歳':42.4,'30-34歳':38.8,'35-39歳':35.0,'40-44歳':31.2,'45-49歳':27.5,'50-54歳':23.9,'55-59歳':20.4,'60-64歳':17.2 }, unit:'回', lower_is_better:false },
-  '反復横跳び':  { male: { '20-24歳':57.1,'25-29歳':56.2,'30-34歳':54.8,'35-39歳':53.0,'40-44歳':51.0,'45-49歳':48.8,'50-54歳':46.4,'55-59歳':43.7,'60-64歳':40.8 }, female: { '20-24歳':48.7,'25-29歳':47.8,'30-34歳':46.4,'35-39歳':44.8,'40-44歳':43.1,'45-49歳':41.2,'50-54歳':38.9,'55-59歳':36.5,'60-64歳':33.9 }, unit:'点', lower_is_better:false },
-  '立ち幅とび':  { male: { '20-24歳':217.0,'25-29歳':213.1,'30-34歳':207.8,'35-39歳':201.4,'40-44歳':194.7,'45-49歳':187.6,'50-54歳':179.5,'55-59歳':170.5,'60-64歳':161.2 }, female: { '20-24歳':168.9,'25-29歳':165.7,'30-34歳':161.4,'35-39歳':156.6,'40-44歳':151.5,'45-49歳':146.0,'50-54歳':139.9,'55-59歳':133.4,'60-64歳':126.7 }, unit:'cm', lower_is_better:false },
-};
+// ============================================================
+//  データ（ログイン中のユーザー分のみ）
+// ============================================================
+let records    = [];
+let activeEvent = '全種目';
+let radarInst=null, compareInst=null, trendInst=null;
 
-const EVENTS = Object.keys(NATIONAL_AVG);
-const EVENT_ICONS = { '50m走':'🏃','長座体前屈':'🧘','上体起こし':'💪','シャトルラン':'🔄','反復横跳び':'↔️','立ち幅とび':'🦘' };
-
-// =============================================
-//  評価ランク（偏差値的目安）
-// =============================================
-function getRank(event, sex, age, record) {
-  const avg = NATIONAL_AVG[event];
-  if (!avg) return '-';
-  const sexKey = sex === '男子' ? 'male' : 'female';
-  const mean = avg[sexKey][age];
-  if (!mean) return '-';
-  const ratio = record / mean;
-  const lib = !avg.lower_is_better;
-  if (lib) {
-    if (ratio >= 1.20) return 'A';
-    if (ratio >= 1.08) return 'B';
-    if (ratio >= 0.93) return 'C';
-    if (ratio >= 0.80) return 'D';
-    return 'E';
-  } else {
-    if (ratio <= 0.85) return 'A';
-    if (ratio <= 0.93) return 'B';
-    if (ratio <= 1.07) return 'C';
-    if (ratio <= 1.18) return 'D';
-    return 'E';
-  }
-}
-
-// 全国平均との差異をパーセントで（上位・下位）
-function getCompPct(event, sex, age, record) {
-  const avg = NATIONAL_AVG[event];
-  if (!avg) return null;
-  const sexKey = sex === '男子' ? 'male' : 'female';
-  const mean = avg[sexKey][age];
-  if (!mean) return null;
-  const lib = !avg.lower_is_better;
-  const diff = ((record - mean) / mean * 100);
-  return lib ? diff : -diff;
-}
-
-// =============================================
-//  データ管理
-// =============================================
-let records = [];
-let activeEvent = '50m走';
-let radarChartInst = null, compareChartInst = null, trendChartInst = null;
-
-function localKey() { return 'tairyoku_records'; }
+function localKey() { return 'tairyoku_' + currentUser; }
 
 async function loadRecords() {
-  // まずローカルキャッシュ
-  try {
-    const cached = localStorage.getItem(localKey());
-    if (cached) records = JSON.parse(cached);
-  } catch(e) {}
-  // GASから取得
+  try { const c = localStorage.getItem(localKey()); if(c) records = JSON.parse(c); } catch(e) {}
   if (GAS_URL !== 'YOUR_GAS_URL_HERE') {
     try {
-      const res = await fetch(GAS_URL + '?action=getAll');
-      const data = await res.json();
-      records = data;
+      const res = await fetch(GAS_URL + '?action=getUser&user=' + encodeURIComponent(currentUser));
+      records = await res.json();
       localStorage.setItem(localKey(), JSON.stringify(records));
-    } catch(e) { console.warn('GAS fetch failed, using local cache'); }
+    } catch(e) { console.warn('GAS接続失敗、ローカルデータ使用'); }
   }
   renderAll();
 }
 
-async function saveRecord(rec) {
-  records.push(rec);
-  localStorage.setItem(localKey(), JSON.stringify(records));
-  if (GAS_URL !== 'YOUR_GAS_URL_HERE') {
-    try {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'add', record: rec }),
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    } catch(e) { console.warn('GAS save failed'); }
-  }
+function saveLocal() { localStorage.setItem(localKey(), JSON.stringify(records)); }
+
+async function gasPost(body) {
+  if (GAS_URL === 'YOUR_GAS_URL_HERE') return;
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify(body), headers:{'Content-Type':'text/plain'} });
+  } catch(e) {}
 }
 
-async function deleteRecord(id) {
-  records = records.filter(r => r.id !== id);
-  localStorage.setItem(localKey(), JSON.stringify(records));
-  if (GAS_URL !== 'YOUR_GAS_URL_HERE') {
-    try {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'delete', id }),
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    } catch(e) {}
-  }
-}
-
-// =============================================
-//  UI
-// =============================================
+// ============================================================
+//  初期化
+// ============================================================
 function initApp() {
-  buildTabs();
+  buildEventChips();
   loadRecords();
 }
 
-function buildTabs() {
-  const tabs = document.getElementById('tabs');
-  tabs.innerHTML = '';
-  EVENTS.forEach(ev => {
-    const btn = document.createElement('button');
-    btn.className = 'tab' + (ev === activeEvent ? ' active' : '');
-    btn.textContent = EVENT_ICONS[ev] + ' ' + ev;
-    btn.onclick = () => { activeEvent = ev; buildTabs(); renderTable(); renderCharts(); };
-    tabs.appendChild(btn);
-  });
-}
-
 function renderAll() {
-  renderTable();
-  renderCharts();
-  updateTrendNameList();
-}
-
-function renderTable() {
-  const tbody = document.getElementById('recordTable');
-  const data = records.filter(r => r.event === activeEvent);
-  document.getElementById('tableHeader').textContent = EVENT_ICONS[activeEvent] + ' ' + activeEvent + 'の記録';
-  if (data.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">記録がありません</td></tr>';
-    return;
-  }
-  const unit = NATIONAL_AVG[activeEvent].unit;
-  tbody.innerHTML = data.map(r => {
-    const rank = getRank(r.event, r.sex, r.age, r.record);
-    const avg = getNatAvg(r.event, r.sex, r.age);
-    const pct = getCompPct(r.event, r.sex, r.age, r.record);
-    const pctStr = pct !== null ? (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%' : '-';
-    const pctColor = pct > 0 ? 'color:#16a34a' : pct < 0 ? 'color:#dc2626' : '';
-    return `<tr>
-      <td><strong>${r.name}</strong></td>
-      <td>${r.sex}</td>
-      <td>${r.age}</td>
-      <td><strong>${r.record}</strong> ${unit}</td>
-      <td>${unit}</td>
-      <td><span class="rank rank-${rank}">${rank}</span></td>
-      <td>${avg ?? '-'} <span style="${pctColor};font-size:12px">${pctStr}</span></td>
-      <td style="color:var(--text-muted);font-size:12px">${r.datetime}</td>
-      <td><button class="btn-del" onclick="delRecord('${r.id}')">削除</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function getNatAvg(event, sex, age) {
-  const avg = NATIONAL_AVG[event];
-  if (!avg) return null;
-  const key = sex === '男子' ? 'male' : 'female';
-  return avg[key][age] ?? null;
-}
-
-function renderCharts() {
-  renderRadar();
-  renderCompare();
-  renderTrendChart();
+  renderList();
   renderStats();
 }
 
-// レーダー
-function renderRadar() {
-  if (records.length === 0) return;
-  const ctx = document.getElementById('radarChart').getContext('2d');
-  if (radarChartInst) radarChartInst.destroy();
-
-  // 直近の人ごとにスコアをまとめる（最初の人の最新記録）
-  const names = [...new Set(records.map(r => r.name))].slice(0, 5);
-  const colors = ['#2563eb','#0ea5e9','#22c55e','#f59e0b','#ef4444'];
-
-  const datasets = names.map((name, i) => {
-    const vals = EVENTS.map(ev => {
-      const recs = records.filter(r => r.name === name && r.event === ev);
-      if (!recs.length) return 0;
-      const last = recs[recs.length - 1];
-      const pct = getCompPct(ev, last.sex, last.age, last.record);
-      // 0〜100スコアに変換（50が平均）
-      return Math.max(0, Math.min(100, 50 + (pct ?? 0)));
-    });
-    return {
-      label: name,
-      data: vals,
-      borderColor: colors[i],
-      backgroundColor: colors[i] + '22',
-      pointBackgroundColor: colors[i],
-      pointRadius: 4,
-    };
-  });
-
-  radarChartInst = new Chart(ctx, {
-    type: 'radar',
-    data: { labels: EVENTS, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: { r: { min: 0, max: 100, ticks: { stepSize: 25 }, pointLabels: { font: { family: 'Noto Sans JP', size: 11 } } } },
-      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Noto Sans JP', size: 11 }, boxWidth: 12 } } }
-    }
-  });
+// ============================================================
+//  種目チップ
+// ============================================================
+function buildEventChips() {
+  const wrap = document.getElementById('eventChips');
+  wrap.innerHTML = ['全種目', ...EVENTS].map(ev =>
+    `<button class="event-chip${ev===activeEvent?' active':''}"
+      onclick="setEvent('${ev}',this)">${ICONS[ev]||'📋'} ${ev}</button>`
+  ).join('');
 }
 
-// 全国平均比較
-function renderCompare() {
-  const ctx = document.getElementById('compareChart').getContext('2d');
-  if (compareChartInst) compareChartInst.destroy();
-  const ev = activeEvent;
-  const evData = records.filter(r => r.event === ev);
-  if (!evData.length) return;
-  const latest = evData[evData.length - 1];
-  const avg = getNatAvg(ev, latest.sex, latest.age);
-  if (!avg) return;
-  const unit = NATIONAL_AVG[ev].unit;
-  compareChartInst = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [latest.name + 'の記録', '全国平均'],
-      datasets: [{
-        data: [latest.record, avg],
-        backgroundColor: ['#2563eb', '#94a3b8'],
-        borderRadius: 8,
-        barThickness: 60,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: false, ticks: { callback: v => v + unit } },
-        x: { grid: { display: false } }
-      }
-    }
-  });
+function setEvent(ev, btn) {
+  activeEvent = ev;
+  document.querySelectorAll('.event-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
 }
 
-// 推移チャート
-function renderTrendChart() {
-  const ctx = document.getElementById('trendChart').getContext('2d');
-  if (trendChartInst) trendChartInst.destroy();
-  const ev = document.getElementById('trendEvent').value;
-  const name = document.getElementById('trendName').value;
-  let data = records.filter(r => r.event === ev);
-  if (name) data = data.filter(r => r.name === name);
-  if (!data.length) return;
-  const unit = NATIONAL_AVG[ev].unit;
-  trendChartInst = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(r => r.name + ' ' + r.datetime.split(' ')[0]),
-      datasets: [{
-        label: ev,
-        data: data.map(r => r.record),
-        backgroundColor: data.map(r => {
-          const rank = getRank(r.event, r.sex, r.age, r.record);
-          return rank === 'A' ? '#22c55e' : rank === 'B' ? '#2563eb' : rank === 'C' ? '#f59e0b' : rank === 'D' ? '#f97316' : '#ef4444';
-        }),
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: false, ticks: { callback: v => v + unit } },
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-      }
-    }
-  });
+// ============================================================
+//  記録一覧
+// ============================================================
+function renderList() {
+  const list = document.getElementById('recList');
+  const data = activeEvent==='全種目' ? records : records.filter(r=>r.event===activeEvent);
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-msg"><div class="empty-icon">📭</div>記録がありません</div>`;
+    return;
+  }
+  list.innerHTML = [...data].reverse().map(r => {
+    const rank = getRank(r.event, r.sex, r.age, r.record);
+    const avg  = getNatAvg(r.event, r.sex, r.age);
+    const unit = NATIONAL_AVG[r.event].unit;
+    const lib  = NATIONAL_AVG[r.event].lib;
+    const diff = avg ? (r.record - avg) / avg * 100 : null;
+    const diffStr   = diff!==null ? (diff>=0?'+':'')+diff.toFixed(1)+'%' : '';
+    const diffColor = diff===null ? '' : (lib?(diff>=0?'color:#16a34a':'color:#dc2626'):(diff<=0?'color:#16a34a':'color:#dc2626'));
+    return `<div class="rec-card">
+      <div class="rec-rank rank-${rank}">${rank}</div>
+      <div class="rec-info">
+        <div class="rec-event">${ICONS[r.event]} ${r.event}</div>
+        <div class="rec-meta">${r.sex}・${r.age}</div>
+        <div class="rec-meta">${r.datetime}</div>
+      </div>
+      <div class="rec-right">
+        <div class="rec-value">${r.record}</div>
+        <div class="rec-unit">${unit}</div>
+        ${avg?`<div class="rec-avg" style="${diffColor}">平均比 ${diffStr}</div>`:''}
+      </div>
+      <button class="rec-del" onclick="delRecord('${r.id}')">🗑</button>
+    </div>`;
+  }).join('');
 }
 
-function updateTrendNameList() {
-  const sel = document.getElementById('trendName');
-  const names = ['', ...[...new Set(records.map(r => r.name))]];
-  const cur = sel.value;
-  sel.innerHTML = names.map(n => `<option value="${n}">${n || '全員'}</option>`).join('');
-  sel.value = names.includes(cur) ? cur : '';
-}
-
-// 統計
-function renderStats() {
-  const grid = document.getElementById('statsGrid');
-  const total = records.length;
-  const names = new Set(records.map(r => r.name)).size;
-  const rankA = records.filter(r => getRank(r.event, r.sex, r.age, r.record) === 'A').length;
-  grid.innerHTML = `
-    <div class="stat-card"><div class="stat-label">総記録数</div><div class="stat-value">${total}</div><div class="stat-sub">全種目合計</div></div>
-    <div class="stat-card"><div class="stat-label">登録人数</div><div class="stat-value">${names}</div><div class="stat-sub">ユニーク</div></div>
-    <div class="stat-card"><div class="stat-label">Aランク数</div><div class="stat-value" style="color:#16a34a">${rankA}</div><div class="stat-sub">全平均比+20%以上</div></div>
-  `;
-}
-
-// =============================================
+// ============================================================
 //  追加・削除
-// =============================================
+// ============================================================
 async function addRecord() {
-  const name = document.getElementById('f-name').value.trim();
-  const sex = document.getElementById('f-sex').value;
-  const age = document.getElementById('f-age').value;
-  const event = document.getElementById('f-event').value;
+  const sex    = document.getElementById('f-sex').value;
+  const age    = document.getElementById('f-age').value;
+  const event  = document.getElementById('f-event').value;
   const record = parseFloat(document.getElementById('f-record').value);
-  if (!name || isNaN(record)) { showToast('名前と記録を入力してください'); return; }
+  if (isNaN(record)) { showToast('記録を入力してください'); return; }
 
   const btn = document.getElementById('addBtn');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true;
 
   const rec = {
     id: Date.now().toString(),
-    name, sex, age, event, record,
-    datetime: new Date().toLocaleString('ja-JP', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' })
+    user: currentUser, sex, age, event, record,
+    datetime: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
   };
-  await saveRecord(rec);
+  records.push(rec);
+  saveLocal();
+  await gasPost({ action:'add', record: rec });
   renderAll();
   document.getElementById('f-record').value = '';
-  showToast('記録を追加しました ✓');
-
-  btn.innerHTML = '＋ 追加';
-  btn.disabled = false;
+  showToast('✓ 記録を追加しました');
+  btn.innerHTML = '＋ 追加する'; btn.disabled = false;
 }
 
 async function delRecord(id) {
-  await deleteRecord(id);
+  records = records.filter(r=>r.id!==id);
+  saveLocal();
+  await gasPost({ action:'delete', id });
   renderAll();
   showToast('削除しました');
 }
 
-// =============================================
-//  リセット
-// =============================================
+// ============================================================
+//  統計
+// ============================================================
+function renderStats() {
+  const total = records.length;
+  const rankA = records.filter(r=>getRank(r.event,r.sex,r.age,r.record)==='A').length;
+  const evCount = new Set(records.map(r=>r.event)).size;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">総記録数</div></div>
+    <div class="stat-card"><div class="stat-num">${evCount}</div><div class="stat-lbl">種目数</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#16a34a">${rankA}</div><div class="stat-lbl">Aランク数</div></div>
+  `;
+}
+
+// ============================================================
+//  グラフ
+// ============================================================
+function renderCharts() {
+  renderRadar(); renderCompare(); renderTrend();
+}
+
+function renderRadar() {
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  if (radarInst) radarInst.destroy();
+  if (!records.length) return;
+  radarInst = new Chart(ctx, {
+    type:'radar',
+    data:{
+      labels: EVENTS,
+      datasets:[{
+        label: currentUser,
+        data: EVENTS.map(ev => {
+          const recs = records.filter(r=>r.event===ev);
+          if (!recs.length) return 0;
+          const last = recs[recs.length-1];
+          return getScore(ev, last.sex, last.age, last.record);
+        }),
+        borderColor:'#2563eb', backgroundColor:'#2563eb22',
+        pointBackgroundColor:'#2563eb', pointRadius:4,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{ r:{ min:0, max:100, ticks:{stepSize:25,font:{size:9}}, pointLabels:{font:{family:'Noto Sans JP',size:10}} }},
+      plugins:{ legend:{ display:false }}
+    }
+  });
+}
+
+function renderCompare() {
+  const ctx = document.getElementById('compareChart').getContext('2d');
+  if (compareInst) compareInst.destroy();
+  const ev   = document.getElementById('compareEvent').value;
+  const data = records.filter(r=>r.event===ev);
+  if (!data.length) return;
+  const last = data[data.length-1];
+  const avg  = getNatAvg(ev, last.sex, last.age);
+  if (!avg) return;
+  const unit = NATIONAL_AVG[ev].unit;
+  compareInst = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['自分の記録', '全国平均'],
+      datasets:[{ data:[last.record, avg], backgroundColor:['#2563eb','#94a3b8'], borderRadius:8, barThickness:56 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        y:{ beginAtZero:false, ticks:{callback:v=>v+unit} },
+        x:{ grid:{display:false} }
+      }
+    }
+  });
+}
+
+function renderTrend() {
+  const ctx  = document.getElementById('trendChart').getContext('2d');
+  if (trendInst) trendInst.destroy();
+  const ev   = document.getElementById('trendEvent').value;
+  const data = records.filter(r=>r.event===ev);
+  if (!data.length) return;
+  const unit = NATIONAL_AVG[ev].unit;
+  const RCOLORS = {A:'#22c55e',B:'#2563eb',C:'#f59e0b',D:'#f97316',E:'#ef4444'};
+  trendInst = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.map(r=>r.datetime.replace(/\//g,'/').split(' ')[0]),
+      datasets:[{
+        label: ev,
+        data: data.map(r=>r.record),
+        backgroundColor: data.map(r=>RCOLORS[getRank(r.event,r.sex,r.age,r.record)]),
+        borderRadius:6,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        y:{ beginAtZero:false, ticks:{callback:v=>v+unit} },
+        x:{ grid:{display:false}, ticks:{font:{size:10}} }
+      }
+    }
+  });
+}
+
+// ============================================================
+//  ナビ
+// ============================================================
+function switchSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name==='chart') { renderStats(); renderCharts(); }
+  if (name==='list')  { buildEventChips(); renderList(); }
+}
+
+// ============================================================
+//  リセット（自分の記録のみ）
+// ============================================================
 function confirmReset() { document.getElementById('resetModal').classList.add('open'); }
-function closeModal() { document.getElementById('resetModal').classList.remove('open'); }
+function closeModal()   { document.getElementById('resetModal').classList.remove('open'); }
 async function doReset() {
   records = [];
-  localStorage.setItem(localKey(), '[]');
-  if (GAS_URL !== 'YOUR_GAS_URL_HERE') {
-    try {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'reset' }),
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    } catch(e) {}
-  }
+  saveLocal();
+  await gasPost({ action:'resetUser', user: currentUser });
   renderAll();
   closeModal();
-  showToast('全記録をリセットしました');
+  showToast('自分の記録をリセットしました');
 }
 
-// =============================================
-//  共通
-// =============================================
-function switchSection(name, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('sec-' + name).classList.add('active');
-  btn.classList.add('active');
-  if (name === 'chart') renderCharts();
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// =============================================
-//  起動チェック
-// =============================================
+// ============================================================
+//  起動
+// ============================================================
 window.onload = () => {
-  if (sessionStorage.getItem('auth') === '1') {
+  const saved = sessionStorage.getItem('user');
+  if (saved) {
+    currentUser = saved;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    document.getElementById('headerUser').textContent = currentUser + ' さん';
     initApp();
   }
 };
