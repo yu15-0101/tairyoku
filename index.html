@@ -476,7 +476,16 @@ function doLogin() {
     document.getElementById('loginError').style.display = 'block';
   }
 }
-function doLogout() { sessionStorage.removeItem('user'); location.reload(); }
+function doLogout() {
+  sessionStorage.removeItem('user');
+  currentUser = null;
+  records = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginName').value = '';
+  document.getElementById('loginPw').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
 
 // ============================================================
 //  データ（ログイン中のユーザー分のみ）
